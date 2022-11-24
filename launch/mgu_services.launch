@@ -1,0 +1,3 @@
+<launch>  
+    <node name="mgu_pose_array_vis" pkg="move_group_utils" type="visualize_poses.py" output="screen"/>  
+</launch>
