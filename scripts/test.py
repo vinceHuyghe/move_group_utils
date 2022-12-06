@@ -11,19 +11,21 @@ def robot_program():
 
     mgi = MoveGroupUtils()
 
-    start = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-    pose_l = Pose(position=Point(1.6, -0.6, 1.0),
+    start = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
+    pose_l = Pose(position=Point(1, -0.6, 0.3),
                   orientation=from_euler(0.0, pi, 0.0))
     pose_r = Pose(position=Point(1.6, 0.6, 1.0),
                   orientation=from_euler(0.0, pi, 0.0))
 
     poses = [start, pose_l, pose_r]
-
-    for pose in poses:
-        mgi.sequencer.plan(Ptp(goal=pose, vel_scale=0.3, acc_scale=0.3))
-        mgi.sequencer.execute()
+    
+    mgi.sequencer.plan(Ptp(goal=start, vel_scale=0.3, acc_scale=0.3))
+    mgi.sequencer.execute()
+    
+    print(mgi.get_ik(poses[1]))
 
 
 if __name__ == "__main__":
 
     robot_program()
+ 

@@ -10,6 +10,7 @@ import tf.transformations
 from geometry_msgs.msg import Point, Pose, PoseArray, PoseStamped, Quaternion
 from moveit_msgs.msg import (AttachedCollisionObject, CollisionObject,
                              RobotTrajectory)
+from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest
 from sensor_msgs.msg import JointState
 from shape_msgs.msg import Mesh, MeshTriangle, SolidPrimitive
 from std_msgs.msg import Header
@@ -90,6 +91,25 @@ class MoveGroupUtils:
         self.scene.add_object(co)
 
         return self.wait_for_state_update(f'{co.id}', object_is_known=True)
+
+    def get_ik(self, pose: Pose) -> JointState:
+
+        rospy.wait_for_service('/compute_ik', 10)
+        ik_srv = rospy.ServiceProxy('/compute_ik', GetPositionIK)
+
+        req = GetPositionIKRequest()
+        req.ik_request.group_name = self.move_group.get_name()
+        req.ik_request.robot_state = self.robot.get_current_state()
+        req.ik_request.avoid_collisions = True
+        req.ik_request.ik_link_name = self.move_group.get_end_effector_link()
+        req.ik_request.timeout = rospy.Duration(10)
+        req.ik_request.pose_stamped.header = Header()
+        req.ik_request.pose_stamped.header.frame_id = self.move_group.get_planning_frame()
+        req.ik_request.pose_stamped.pose = pose
+
+        res = ik_srv(req)
+
+        return res.solution.joint_state
 
     def attach_end_effector(
         self,
