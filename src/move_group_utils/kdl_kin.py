@@ -19,6 +19,9 @@ def frame_to_list(frame: kdl.Frame) -> List[float]:
 class KdlKin():
 
     def __init__(self) -> None:
+        
+        # TODO: add check if robot description is available on
+        # parameter server and if not log error and return
 
         self.urdf = URDF.from_parameter_server()
         # TODO get joint limits from urdf

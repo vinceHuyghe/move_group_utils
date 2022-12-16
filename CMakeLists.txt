@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   trajectory_msgs
+  moveit_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,6 +60,7 @@ catkin_python_setup()
 add_service_files(
   FILES
   VisualizePoses.srv
+  VisualizeTrajectory.srv
 
 )
 
@@ -74,7 +76,8 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
-  trajectory_msgs  # Or other packages containing msgs
+  trajectory_msgs
+  moveit_msgs  # Or other packages containing msgs
 )
 
 ################################################
@@ -167,6 +170,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   services/visualize_poses.py
+  services/visualize_trajectory.py
   scripts/test.py
   scripts/gh_ros.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
