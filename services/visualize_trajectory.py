@@ -24,7 +24,7 @@ class TrajectoryVisualizer:
 
     def _visualize_trajectory(self, req):
         marker_array = MarkerArray()
-        for i in range(len(req.joint_trajectory.points)):
+        for i in range(len(req.trajectory.JointTrajectory.points)):
             marker = Marker()
             marker.colors = [0.0, 0.0, 1.0, 1.0]
             marker.header = Header()
