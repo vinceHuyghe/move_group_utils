@@ -19,7 +19,7 @@ from yaml import safe_load
 
 from pilz_robot_program.pilz_robot_program import (Circ, Lin, MoveGroupSequence,
                                                    Ptp, Sequence, from_euler)
-from move_group_utils.srv import VisualizePoses
+from move_group_utils.srv import VisualizePoses, VisualizeTrajectory, ClearMarkerArray
 
 PLANNING_GROUP = 'manipulator'
 
@@ -204,6 +204,26 @@ class MoveGroupUtils:
         rospy.logerr(f'{self.name}: failed to update scene -> {object_name}')
 
         return False
+
+
+def publish_trajectory_markers(trajectory: RobotTrajectory) -> bool:
+
+    rospy.wait_for_service('/mgu/visualize_trajectory', 10)
+
+    srv = rospy.ServiceProxy(
+        '/mgu/visualize_trajectory', VisualizeTrajectory)
+
+    return srv.call(trajectory)
+
+
+def clear_marker_array() -> bool:
+
+    rospy.wait_for_service('/mgu/clear_visualized_trajectory', 10)
+
+    srv = rospy.ServiceProxy(
+        '/mgu/clear_visualized_trajectory', ClearMarkerArray)
+
+    return srv.call()
 
 
 def make_mesh(

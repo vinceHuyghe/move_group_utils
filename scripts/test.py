@@ -11,6 +11,8 @@ import rospy
 def robot_program():
 
     mgi = MoveGroupUtils()
+    
+    rospy.sleep(3.0)
 
     start = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
     pose_l = Pose(position=Point(1, -0.6, 0.3),
@@ -27,8 +29,6 @@ def robot_program():
     
     mgi.sequencer.execute()
     
-    print(mgi.get_ik(poses[1]))
-
 
 if __name__ == '__main__':
 

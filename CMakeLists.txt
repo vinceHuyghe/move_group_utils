@@ -61,6 +61,7 @@ add_service_files(
   FILES
   VisualizePoses.srv
   VisualizeTrajectory.srv
+  ClearMarkerArray.srv
 
 )
 

@@ -1,11 +1,11 @@
+from math import pi
+from typing import List
+
 import numpy as np
 import PyKDL as kdl
 import rospy
-from typing import List
-from math import pi
-
+from kdl_parser_py.urdf import treeFromParam, treeFromUrdfModel
 from urdf_parser_py.urdf import URDF
-from kdl_parser_py.urdf import treeFromUrdfModel, treeFromParam
 
 
 def frame_to_list(frame: kdl.Frame) -> List[float]:
@@ -19,9 +19,9 @@ def frame_to_list(frame: kdl.Frame) -> List[float]:
 class KdlKin():
 
     def __init__(self) -> None:
-        
-        # TODO: add check if robot description is available on
-        # parameter server and if not log error and return
+
+        if not rospy.has_param('robot_description'):
+            return rospy.logerr('No robot description found on parameter server')
 
         self.urdf = URDF.from_parameter_server()
         # TODO get joint limits from urdf
