@@ -18,7 +18,7 @@ def frame_to_list(frame: kdl.Frame) -> List[float]:
 
 class KdlKin():
 
-    def __init__(self) -> None:
+    def __init__(self):
 
         if not rospy.has_param('robot_description'):
             return rospy.logerr('No robot description found on parameter server')
