@@ -1,3 +1,4 @@
+from typing import List
 import rospy
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker, MarkerArray
@@ -6,6 +7,26 @@ from moveit_msgs.msg import RobotTrajectory
 from move_group_utils.kdl_kin import KdlKin
 from move_group_utils.srv import VisualizeTrajectory, ClearMarkerArray
 from moveit_commander.conversions import list_to_pose
+from std_msgs.msg import ColorRGBA
+
+
+start_color = ColorRGBA(1.0, 0.0, 0.0, 0.7)
+end_color = ColorRGBA(1.0, 1.0, 0.0, 0.7)
+marker_scale = 0.005
+
+
+def _rgd_gradient(start_color: ColorRGBA,
+                  end_color: ColorRGBA,
+                  steps: int) -> List[ColorRGBA]:
+    color_list = []
+    for i in range(steps):
+        color = ColorRGBA()
+        color.r = start_color.r + (end_color.r - start_color.r) * i / steps
+        color.g = start_color.g + (end_color.g - start_color.g) * i / steps
+        color.b = start_color.b + (end_color.b - start_color.b) * i / steps
+        color.a = start_color.a + (end_color.a - start_color.a) * i / steps
+        color_list.append(color)
+    return color_list
 
 
 class TrajectoryVisualizer:
@@ -17,10 +38,10 @@ class TrajectoryVisualizer:
                                           MarkerArray, queue_size=1)
         self.traj_viz_srv = rospy.Service('/mgu/visualize_trajectory',
                                           VisualizeTrajectory,
-                                          self._visualize_trajectory)
+                                          self.visualize_trajectory_callback)
         self.clear_maker_array_srv = rospy.Service('/mgu/clear_marker_array',
                                                    ClearMarkerArray,
-                                                   self._clear_markers)
+                                                   self.clear_markers_callback)
 
         self.rate = rospy.Rate(100)
 
@@ -29,22 +50,24 @@ class TrajectoryVisualizer:
         while not rospy.is_shutdown():
             self.rate.sleep()
 
-    def _visualize_trajectory(self, req):
+    def visualize_trajectory_callback(self, req):
+
+        self.clear_markers()
+
+        color_list = _rgd_gradient(start_color, end_color, len(
+            req.trajectory.joint_trajectory.points))
 
         marker_array = MarkerArray()
         for i in range(len(req.trajectory.joint_trajectory.points)):
             marker = Marker()
-            marker.color.r = 1.0
-            marker.color.g = 0.0
-            marker.color.b = 0.0
-            marker.color.a = 0.6
+            marker.color = color_list[i]
             marker.header = Header()
             marker.header.frame_id = 'base_link'
             marker.header.stamp = rospy.Time.now()
             marker.id = i
-            marker.scale.x = 0.005
-            marker.scale.y = 0.005
-            marker.scale.z = 0.005
+            marker.scale.x = marker_scale
+            marker.scale.y = marker_scale
+            marker.scale.z = marker_scale
             marker.type = Marker.SPHERE
             marker.action = Marker.ADD
             marker.pose = list_to_pose(self.kdl_kin.get_fk(
@@ -56,7 +79,14 @@ class TrajectoryVisualizer:
 
         return True
 
-    def _clear_markers(self, req):
+    def clear_markers_callback(self, req):
+
+        self.clear_makers()
+
+        return True
+
+    def clear_markers(self):
+
         marker_array = MarkerArray()
         marker = Marker()
         marker.header = Header()
@@ -66,8 +96,6 @@ class TrajectoryVisualizer:
         marker.action = Marker.DELETEALL
         marker_array.markers.append(marker)
         self.marker_pub.publish(marker_array)
-
-        return True
 
 
 if __name__ == '__main__':

@@ -13,7 +13,7 @@ class PoseVisualizer:
             "/mgu_poses", PoseArray, queue_size=1)
         self.viz_pose_srv = rospy.Service("/mgu/visualize_poses",
                                           VisualizePoses,
-                                          self._visualize_poses)
+                                          self._visualize_poses_callback)
         self.rate = rospy.Rate(100)
 
     def run(self):
@@ -21,7 +21,7 @@ class PoseVisualizer:
         while not rospy.is_shutdown():
             self.rate.sleep()
 
-    def _visualize_poses(self, req):
+    def visualize_poses_callback(self, req):
         self.pose_array.poses = req.poses
         self.pose_array.header.frame_id = req.frame_id
         self.pose_array.header.stamp = rospy.Time.now()
