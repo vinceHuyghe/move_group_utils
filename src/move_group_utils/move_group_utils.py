@@ -175,6 +175,36 @@ class MoveGroupUtils:
 
         return self.wait_for_state_update(name, object_is_attached=True)
 
+    def attach_camera(self,
+                      name: str,
+                      tcp_pose: Pose,
+                      size: List[float]) -> bool:
+
+        pose = PoseStamped()
+        pose.header = Header()
+        pose.header.frame_id = self.move_group.get_end_effector_link()
+        pose.pose = Pose(
+            position=Point(0, 0, size[2]/2), orientation=Quaternion(0, 0, 0, 1)
+        )
+
+        ac = AttachedCollisionObject()
+        ac.object.id = name
+        ac.object.header = pose.header
+        ac.object.pose = pose.pose
+        ac.object.operation = CollisionObject.ADD
+        box = SolidPrimitive()
+        box.type = SolidPrimitive.BOX
+        box.dimensions = size
+        ac.object.primitives = [box]
+        ac.link_name = self.move_group.get_end_effector_link()
+        ac.object.subframe_names = ['tcp']
+        ac.object.subframe_poses = [tcp_pose]
+        # TODO fix sleep req
+        rospy.sleep(1)
+        self.scene.attach_object(ac)
+
+        return self.wait_for_state_update(name, object_is_attached=True)
+
     def wait_for_state_update(
         self,
         object_name: str,
@@ -329,4 +359,5 @@ def quat_to_ur_axis_angle(quaternion: List[float]) -> List[float]:
         ]
     else:
         axis_normed = 0.0
-    return [axis_normed[0] * angle, axis_normed[1] * angle, axis_normed[2] * angle]
+    return [axis_normed[0] * angle, axis_normed[1] * angle,
+            axis_normed[2] * angle]
